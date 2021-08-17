@@ -53,7 +53,7 @@ class Server:
     def send_msg_to_all(self,data: bytes, user_socket: socket.socket):
         for sock, name in self.users.items():
             if sock != user_socket:
-                sock.sendall(f"{name}: data")
+                sock.sendall(f"{name.decode('utf-8')}: {data.decode('utf-8')}".encode('utf-8'))
 
 
 if __name__ == '__main__':
