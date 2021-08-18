@@ -17,11 +17,13 @@ class Server:
             socket_conn, address = socket_server.accept()
             print(f'{address} is connected')
 
+            socket_conn.sendall('username'.encode('utf-8'))
             user_name = socket_conn.recv(1024)
 
             if not self.users.get(socket_conn):
                 self.users[socket_conn] = user_name.decode('utf-8')
-                socket_conn.send('Соединение установленное'.encode('utf-8'))
+                connected = ' Соединение установленное '.center(130,'-') + '\n\n'
+                socket_conn.send(connected.encode('utf-8'))
 
                 threading.Thread(target=self.listening_users, args=(socket_conn,)).start()
 
@@ -53,7 +55,7 @@ class Server:
     def send_msg_to_all(self,data: bytes, user_socket: socket.socket):
         for user in self.users:
             if user != user_socket:
-                user.sendall(f"{self.users.get(user_socket)}: {data}".encode('utf-8'))
+                user.sendall(f"{self.users.get(user_socket)}: {data.decode('utf-8')}\n".encode('utf-8'))
 
 
 if __name__ == '__main__':
