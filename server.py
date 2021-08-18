@@ -20,7 +20,7 @@ class Server:
             user_name = socket_conn.recv(1024)
 
             if not self.users.get(socket_conn):
-                self.users[socket_conn] = user_name
+                self.users[socket_conn] = user_name.decode('utf-8')
                 socket_conn.send('Соединение установленное'.encode('utf-8'))
 
                 threading.Thread(target=self.listening_users, args=(socket_conn,)).start()
@@ -51,9 +51,9 @@ class Server:
                 self.send_msg_to_all(data=data, user_socket=user_socket)
 
     def send_msg_to_all(self,data: bytes, user_socket: socket.socket):
-        for sock, name in self.users.items():
-            if sock != user_socket:
-                sock.sendall(f"{name.decode('utf-8')}: {data.decode('utf-8')}".encode('utf-8'))
+        for user in self.users:
+            if user != user_socket:
+                user.sendall(f"{self.users.get(user_socket)}: {data}".encode('utf-8'))
 
 
 if __name__ == '__main__':
