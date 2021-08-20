@@ -31,23 +31,23 @@ class Gui:
         self.window.protocol("WM_DELETE_WINDOW", self.client.exit_from_chat)
 
     def init_text_area(self):
-        frame = tk.Frame(bg='gray88')
+        frame_text_area = tk.Frame(bg='gray88')
 
-        chat_label = tk.Label(frame, text='Chat box:', bg='gray88')
+        chat_label = tk.Label(master=frame_text_area, text='Chat box:', bg='gray88')
         chat_label.config(font=('Roboto', 15))
         chat_label.pack(side='top', anchor='w', padx=10)
 
-        self.text_area = scrolledtext.ScrolledText(master=frame, width=90, background='white smoke',
+        self.text_area = scrolledtext.ScrolledText(master=frame_text_area, width=90, background='white smoke',
                                                    font=("Roboto", 11))
         self.text_area.pack(side='left', padx=10)
         self.text_area.config(state='disabled')
 
-        frame.pack(side='top')
+        frame_text_area.pack(side='top')
 
     def init_username_input(self):
         self.frame_username_input = tk.Frame(bg='gray88')
 
-        chat_label = tk.Label(self.frame_username_input, text='username:', bg='gray88')
+        chat_label = tk.Label(master=self.frame_username_input, text='username:', bg='gray88')
         chat_label.config(font=('Roboto', 12))
         chat_label.pack(side='left', padx=15)
 
@@ -88,8 +88,7 @@ class Gui:
         self.text_area.config(state='disabled')
 
     def grab_message(self):
-        message = self.text_input.get('1.0', tk.END).strip()
-        return message
+        return self.text_input.get('1.0', tk.END).strip()
 
     def destroy_user_input(self):
         self.frame_username_input.destroy()
