@@ -80,7 +80,7 @@ class Gui:
         self.frame_text_input.pack(side='top')
 
     def handler_text_area(self, data):
-        letter = data.decode() if isinstance(data, bytes) else 'You: ' + self.client.msg + '\n'
+        letter = data.decode('utf-8') if isinstance(data, bytes) else f'You: {self.client.msg}\n'
 
         self.text_area.config(state='normal')
         self.text_area.insert(tk.END, letter)
@@ -103,8 +103,8 @@ class Gui:
     def messagebox_exit(self):
         return messagebox.askokcancel("Exit", "Do you want to exit the program?")
 
+    def messagebox_info(self, title, text):
+        messagebox.showinfo(title, text)
+
     def clear_text_input(self):
         self.text_input.delete('1.0', tk.END)
-
-    def offline_server(self):
-        messagebox.showinfo('Server is offline', 'Server is offline')
