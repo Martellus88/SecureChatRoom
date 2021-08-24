@@ -78,9 +78,7 @@ class Client:
                     self.gui.handler_text_area(data=self.msg.replace(b'&??*', b' '))
                 else:
                     nickname, letter = self.msg.split(b'&??*')
-
                     received_letter = self.decrypt_message(letter)
-
                     self.gui.handler_text_area(data=nickname + b': ' + received_letter + b'\n')
             except (ConnectionResetError, ConnectionAbortedError) as e:
                 print(e, type(e))
@@ -105,14 +103,12 @@ class Client:
         private_key = key.export_key()
         with open('private_key.pem', 'wb') as f:
             f.write(private_key)
-
         self.__public_key = key.public_key().export_key()
 
     def encrypt_message(self, message):
         try:
             cipher_aes = AES.new(self.__ssk, AES.MODE_EAX)
             cipher_text, tag = cipher_aes.encrypt_and_digest(message)
-
             return cipher_aes.nonce, tag, cipher_text
         except ValueError as e:
             print('Hacking attempt!', e)
@@ -121,9 +117,7 @@ class Client:
     def decrypt_message(self, message):
         try:
             text = message.split(b'!:@')
-
             nonce, tag, cipher_text = text
-
             cipher_aes = AES.new(self.__ssk, AES.MODE_EAX, nonce)
             data = cipher_aes.decrypt_and_verify(cipher_text, tag)
             return data
@@ -133,11 +127,8 @@ class Client:
 
     def decrypt_session_key(self, crypto_session_key):
         try:
-
             ssk = crypto_session_key.replace(b'&-^*', b'')
-
             private_key = RSA.import_key(open('private_key.pem').read())
-
             cipher_rsa = PKCS1_OAEP.new(private_key)
             self.__ssk = cipher_rsa.decrypt(ssk)
         except ValueError as e:
@@ -146,5 +137,5 @@ class Client:
 
 
 if __name__ == '__main__':
-    client = Client('192.168.1.26', 6666)
+    client = Client('127.0.0.1', 6666)
     client.run()

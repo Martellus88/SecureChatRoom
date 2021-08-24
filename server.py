@@ -33,26 +33,28 @@ class Server:
                 if self.users.get(socket_conn) is None and len(self.users) < self.MAX_CLIENTS:
                     self.__handshake(socket_conn=socket_conn)
                     self.users[socket_conn] = user_name
+
                     connected = ' Connection established '.center(135, '-') + '\n\n'
                     socket_conn.send(connected.encode('utf-8'))
+
                     threading.Thread(target=self.listening_users, args=(socket_conn,)).start()
                 if len(self.users) == self.MAX_CLIENTS:
                     self.__ssk = None
             except ConnectionResetError as e:
                 print(e, type(e))
 
+    def create_server(self):
+        self.socket_server = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
+        self.socket_server.bind((self.ip, self.port))
+        self.socket_server.listen(self.MAX_CLIENTS)
+
+        print('Server is running')
+
     def __handshake(self, socket_conn):
         pub_key = socket_conn.recv(2048)
         time.sleep(0.1)
         encrypt_ssk = self.crypt_session_key(client_pub_key=pub_key)
         socket_conn.send(encrypt_ssk + b'&-^*')
-
-    def create_server(self):
-        self.socket_server = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
-        self.socket_server.bind((self.ip, self.port))
-        self.socket_server.listen(3)
-
-        print('Server is running')
 
     def listening_users(self, user_socket):
         while True:
@@ -81,7 +83,6 @@ class Server:
             user_key = RSA.import_key(client_pub_key)
             cipher_rsa = PKCS1_OAEP.new(user_key)
             encrypt_session_key = cipher_rsa.encrypt(self.__ssk)
-
             return encrypt_session_key
         except ValueError as e:
             print('Hacking attempt!', e)
@@ -90,5 +91,5 @@ class Server:
 
 
 if __name__ == '__main__':
-    server = Server('192.168.1.26', 6666)
+    server = Server('127.0.0.1', 6666)
     server.run()
