@@ -2,13 +2,14 @@ import socket
 import threading
 import os
 import time
+from hashlib import sha256
 
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Cipher import PKCS1_OAEP
 
 
 class Server:
-    MAX_CLIENTS = 3
+    MAX_CLIENTS = 2
 
     def __init__(self, ip: str, port: int):
         self.ip = ip
@@ -23,16 +24,21 @@ class Server:
     def run(self):
         self.create_server()
 
-        self.__ssk = os.urandom(32)
+        # self.__ssk = os.urandom(32) #?
 
         while True:
+
             socket_conn, address = self.socket_server.accept()
+
             try:
                 user_name = socket_conn.recv(1024)
 
                 if self.users.get(socket_conn) is None and len(self.users) < self.MAX_CLIENTS:
+                    if self.__ssk is None:
+                        self.__ssk = os.urandom(32)
                     self.__handshake(socket_conn=socket_conn)
                     self.users[socket_conn] = user_name
+
 
                     connected = ' Connection established '.center(135, '-') + '\n\n'
                     socket_conn.send(connected.encode('utf-8'))
@@ -53,8 +59,9 @@ class Server:
     def __handshake(self, socket_conn):
         pub_key = socket_conn.recv(2048)
         time.sleep(0.1)
+        hash_ssk = sha256(self.__ssk).digest()
         encrypt_ssk = self.crypt_session_key(client_pub_key=pub_key)
-        socket_conn.send(encrypt_ssk + b'&-^*')
+        socket_conn.send(encrypt_ssk + b'&-^*' + hash_ssk)
 
     def listening_users(self, user_socket):
         while True:
@@ -88,7 +95,6 @@ class Server:
             print('Hacking attempt!', e)
             self.socket_server.close()
             exit()
-
 
 if __name__ == '__main__':
     server = Server('127.0.0.1', 6666)

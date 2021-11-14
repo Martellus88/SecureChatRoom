@@ -1,5 +1,6 @@
 import socket
 import threading
+from hashlib import sha256
 
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Cipher import AES, PKCS1_OAEP
@@ -127,10 +128,16 @@ class Client:
 
     def decrypt_session_key(self, crypto_session_key):
         try:
-            ssk = crypto_session_key.replace(b'&-^*', b'')
+            ssk, hash_ssk = crypto_session_key.split(b'&-^*')
+
             private_key = RSA.import_key(open('private_key.pem').read())
             cipher_rsa = PKCS1_OAEP.new(private_key)
             self.__ssk = cipher_rsa.decrypt(ssk)
+
+            check_hash_ssk = sha256(self.__ssk).digest()
+            if hash_ssk != check_hash_ssk:
+                raise ValueError
+
         except ValueError as e:
             print('Hacking attempt!', e)
             self.emergency_closure(title='Hacking attempt!', text='Hacking attempt!!! Termination of work')
