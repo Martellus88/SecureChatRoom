@@ -39,7 +39,6 @@ class Server:
                     self.__handshake(socket_conn=socket_conn)
                     self.users[socket_conn] = user_name
 
-
                     connected = ' Connection established '.center(135, '-') + '\n\n'
                     socket_conn.send(connected.encode('utf-8'))
 
@@ -95,6 +94,7 @@ class Server:
             print('Hacking attempt!', e)
             self.socket_server.close()
             exit()
+
 
 if __name__ == '__main__':
     server = Server('127.0.0.1', 6666)
