@@ -1,3 +1,4 @@
+import os
 import socket
 import threading
 from hashlib import sha256
@@ -27,7 +28,6 @@ class Client:
     def run(self):
         self.create_socket()
         self.gui.init_gui()
-
         self.gui.window.mainloop()
 
     def create_socket(self):
@@ -73,9 +73,7 @@ class Client:
         while not self.stop:
             try:
                 self.msg = self.client_socket.recv(2048)
-                if b'Connection' in self.msg:
-                    self.gui.handler_text_area(data=self.msg)
-                elif b'LEFT' in self.msg:
+                if b'joined' in self.msg or b'LEFT' in self.msg:
                     self.gui.handler_text_area(data=self.msg.replace(b'&??*', b' '))
                 else:
                     nickname, letter = self.msg.split(b'&??*')
@@ -100,7 +98,6 @@ class Client:
 
     def generate_rsa_keys(self):
         key = RSA.generate(2048)
-
         private_key = key.export_key()
         with open('private_key.pem', 'wb') as f:
             f.write(private_key)
@@ -137,6 +134,8 @@ class Client:
             check_hash_ssk = sha256(self.__ssk).digest()
             if hash_ssk != check_hash_ssk:
                 raise ValueError
+
+            os.remove(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'private_key.pem'))
 
         except ValueError as e:
             print('Hacking attempt!', e)
